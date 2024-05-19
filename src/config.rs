@@ -96,15 +96,13 @@ pub struct EncoderConfig {
     pub select_keys: Option<Vec<char>>,
     pub auto_select_length: Option<usize>,
     pub auto_select_pattern: Option<String>,
-    // 单字全码
+    // 一字词全码
     pub sources: HashMap<String, NodeConfig>,
     pub conditions: HashMap<String, EdgeConfig>,
-    // 单字简码
-    pub short_code_schemes: Option<Vec<ShortCodeConfig>>,
-    // 词语全码
+    // 多字词全码
     pub rules: Option<Vec<WordRule>>,
-    // 词语简码
-    pub word_short_code_schemes: Option<Vec<ShortCodeConfig>>,
+    // 简码
+    pub short_code: Option<Vec<ShortCodeConfig>>,
 }
 
 #[skip_serializing_none]
@@ -140,9 +138,21 @@ pub struct EdgeConfig {
     pub negative: Option<String>,
 }
 
-#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ShortCodeConfig {
+#[serde(untagged)]
+pub enum ShortCodeConfig {
+    Equal {
+        length_equal: usize,
+        schemes: Vec<Scheme>,
+    },
+    Range {
+        length_in_range: (usize, usize),
+        schemes: Vec<Scheme>,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Scheme {
     pub prefix: usize,
     pub count: Option<usize>,
     pub select_keys: Option<Vec<char>>,
